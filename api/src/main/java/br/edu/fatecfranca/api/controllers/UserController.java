@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.edu.fatecfranca.api.dtos.UserRequest;
 import br.edu.fatecfranca.api.entities.User;
 import br.edu.fatecfranca.api.services.UserService;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/users")
@@ -27,9 +29,8 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> create(@RequestBody User user) {
-
-        User savedUser = service.create(user);
+    public ResponseEntity<User> create(@Valid @RequestBody UserRequest request) {
+        User savedUser = service.create(request);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -43,7 +44,6 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<User> findById(@PathVariable Long id) {
-
         return service.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -52,20 +52,17 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<User> update(
             @PathVariable Long id,
-            @RequestBody User user) {
+            @Valid @RequestBody UserRequest request) {
 
         if (!service.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
 
-        user.setId(id);
-
-        return ResponseEntity.ok(service.update(user));
+        return ResponseEntity.ok(service.update(id, request));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-
         if (!service.existsById(id)) {
             return ResponseEntity.notFound().build();
         }
@@ -74,5 +71,4 @@ public class UserController {
 
         return ResponseEntity.noContent().build();
     }
-
 }
